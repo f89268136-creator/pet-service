@@ -1,28 +1,159 @@
-# Java / Maven
+# ============================================================
+# 宠物服务预约系统 - 忽略规则
+# 原则：构建产物、依赖、IDE 配置、本机个性化文件、一切凭据不进版本库
+# ============================================================
+
+# ------------------------------------------------------------
+# 1. 敏感信息 / 凭据（最高优先级）
+# ------------------------------------------------------------
+
+# 环境变量文件（数据库口令、OSS AK/SK、微信 AppSecret、JWT 密钥等）
+.env
+.env.*
+!.env.example
+!.env.template
+
+# 前端工程内的本地环境覆盖（保留 .env.development / .env.production 等配置模板）
+pet-admin/.env.local
+pet-admin/.env.*.local
+
+# 以下 .env 为不含密钥的构建配置模板，必须入库（用于覆盖上面的通配规则）
+!pet-admin/.env.development
+!pet-admin/.env.production
+!pet-admin/.env.staging
+!pet-admin/.env.production.uat
+
+# Spring Boot 本地 / 私有配置覆盖（application.yml 与 application-dev.yml 只保留占位符，可入库）
+**/application-local.yml
+**/application-local.yaml
+**/application-local.properties
+**/application-private.yml
+**/application-private.yaml
+**/application-private.properties
+**/application-secret.yml
+**/application-secret.yaml
+**/application-secret.properties
+**/bootstrap-local.yml
+**/bootstrap-local.yaml
+
+# 私钥 / 证书 / 密钥库
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.cer
+*.crt
+*.der
+*.p8
+*.mobileprovision
+id_rsa*
+id_ed25519*
+id_ecdsa*
+.ssh/
+
+# 云厂商 / 第三方服务凭据
+credentials.json
+service-account*.json
+*credentials*.yml
+*credentials*.properties
+.npmrc
+.yarnrc
+.pypirc
+.netrc
+**/.aws/
+**/.aliyun/
+**/.kube/config
+
+# 本地数据库备份 / 导出（含真实业务数据，切勿入库）
+*.dump
+*.sql.gz
+**/*.dump.sql
+**/*-backup.sql
+**/*_backup.sql
+**/*-local.sql
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# ------------------------------------------------------------
+# 2. 小程序开发者工具私有配置（含本机路径、AppID 私有设置）
+# ------------------------------------------------------------
+pet-weixin/project.private.config.json
+
+# ------------------------------------------------------------
+# 3. Java / Maven
+# ------------------------------------------------------------
 target/
+!.mvn/wrapper/maven-wrapper.jar
 *.class
 *.jar
 *.war
+*.ear
 *.log
 logs/
+hs_err_pid*
+replay_pid*
 
-# Node
+# ------------------------------------------------------------
+# 4. Node / 前端构建
+# ------------------------------------------------------------
 node_modules/
 dist/
+.npm/
+.cache/
+coverage/
+.nyc_output/
+*.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
 
-# 小程序开发者工具
-pet-weixin/project.private.config.json
+# Cypress / E2E 产物
+pet-admin/tests/e2e/videos/
+pet-admin/tests/e2e/screenshots/
+pet-admin/tests/**/coverage/
 
-# IDE
+# ------------------------------------------------------------
+# 5. 运行时上传与临时文件
+# ------------------------------------------------------------
+uploads/
+upload/
+temp/
+tmp/
+*.pid
+*.seed
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------
+# 6. IDE / 编辑器
+# ------------------------------------------------------------
 .idea/
 .vscode/
 *.iml
+*.ipr
+*.iws
 .history
+.settings/
+.project
+.classpath
+.factorypath
 *.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# 系统
+# ------------------------------------------------------------
+# 7. 操作系统
+# ------------------------------------------------------------
 .DS_Store
+._*
 Thumbs.db
+ehthumbs.db
+desktop.ini
