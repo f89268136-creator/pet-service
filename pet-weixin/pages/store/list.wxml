@@ -1,0 +1,80 @@
+<view class="store-page">
+  <view class="mode-tabs">
+    <view class="mode-tab {{mode === 'list' ? 'active' : ''}}" data-mode="list" bindtap="switchMode">全部门店</view>
+    <view class="mode-tab {{mode === 'nearby' ? 'active' : ''}}" data-mode="nearby" bindtap="switchMode">附近门店</view>
+  </view>
+
+  <view class="page">
+    <block wx:if="{{mode === 'list'}}">
+      <view wx:if="{{loading && stores.length === 0}}" class="loading-tip">正在加载门店...</view>
+      <view wx:elif="{{stores.length === 0}}" class="empty">
+        <view class="empty-title">暂无营业中的门店</view>
+        <view>请稍后再来或联系客服</view>
+      </view>
+
+      <view class="store-card" wx:for="{{stores}}" wx:key="id">
+        <view class="store-head">
+          <view class="store-avatar">{{item.initial}}</view>
+          <view class="store-main">
+            <view class="store-name">{{item.name}}</view>
+            <view class="store-address">{{item.address}}</view>
+          </view>
+          <view class="tag {{item.status === 1 ? 'tag-success' : 'tag-muted'}}">{{item.statusText}}</view>
+        </view>
+
+        <view class="store-meta">
+          <text>营业时间 {{item.openLabel}}</text>
+          <text wx:if="{{item.phone}}">电话 {{item.phone}}</text>
+        </view>
+        <view class="store-desc" wx:if="{{item.description}}">{{item.description}}</view>
+
+        <view class="store-actions">
+          <button class="btn btn-sm btn-ghost" data-phone="{{item.phone}}" bindtap="callStore">电话咨询</button>
+          <button
+            class="btn btn-sm btn-light"
+            data-lat="{{item.latitude}}"
+            data-lng="{{item.longitude}}"
+            data-name="{{item.name}}"
+            data-address="{{item.address}}"
+            bindtap="openLocation"
+          >门店导航</button>
+        </view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view wx:if="{{nearbyLoading}}" class="loading-tip">正在定位并查询附近门店...</view>
+      <view wx:elif="{{nearby.length === 0}}" class="empty">
+        <view class="empty-title">附近暂无门店</view>
+        <view>请确认已开启位置权限，或切换查看全部门店</view>
+      </view>
+
+      <view class="store-card" wx:for="{{nearby}}" wx:key="id">
+        <view class="store-head">
+          <view class="store-avatar">{{item.initial}}</view>
+          <view class="store-main">
+            <view class="store-name">{{item.name}}</view>
+            <view class="store-address">{{item.address}}</view>
+          </view>
+          <view class="tag tag-primary">{{item.distanceText}}</view>
+        </view>
+
+        <view class="store-meta" wx:if="{{item.phone}}">
+          <text>电话 {{item.phone}}</text>
+        </view>
+
+        <view class="store-actions">
+          <button class="btn btn-sm btn-ghost" data-phone="{{item.phone}}" bindtap="callStore">电话咨询</button>
+          <button
+            class="btn btn-sm btn-light"
+            data-lat="{{item.latitude}}"
+            data-lng="{{item.longitude}}"
+            data-name="{{item.name}}"
+            data-address="{{item.address}}"
+            bindtap="openLocation"
+          >门店导航</button>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

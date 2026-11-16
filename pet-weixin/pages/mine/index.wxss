@@ -1,0 +1,213 @@
+.profile {
+  position: relative;
+  height: 260rpx;
+  padding: 46rpx 32rpx;
+  background: linear-gradient(135deg, #e95f3c 0%, #f4876a 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.profile-main {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 116rpx;
+  height: 116rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.24);
+  border: 2rpx solid rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  font-size: 46rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-size: 38rpx;
+  font-weight: 700;
+}
+
+.profile-phone {
+  margin-top: 8rpx;
+  font-size: 25rpx;
+  opacity: 0.9;
+}
+
+.profile-id {
+  margin-top: 4rpx;
+  font-size: 21rpx;
+  opacity: 0.75;
+}
+
+.profile-badge {
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.45);
+  font-size: 22rpx;
+}
+
+.mine-body {
+  margin-top: -80rpx;
+  position: relative;
+}
+
+.sign-card {
+  padding: 28rpx;
+}
+
+.sign-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sign-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #20232a;
+  margin-bottom: 4rpx;
+}
+
+.sign-btn {
+  flex-shrink: 0;
+  padding: 0 32rpx;
+}
+
+.sign-btn.signed {
+  background: #f1f2f4;
+  color: #8a8f99;
+}
+
+.sign-stats {
+  margin-top: 26rpx;
+  display: flex;
+  padding-top: 22rpx;
+  border-top: 1rpx solid #f2f3f5;
+}
+
+.stat-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #20232a;
+}
+
+.stat-value.highlight {
+  color: #e95f3c;
+}
+
+.stat-label {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #9aa0a8;
+}
+
+.sign-tip {
+  margin-top: 18rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 12rpx;
+  background: #fff8f4;
+  font-size: 22rpx;
+  color: #b86245;
+}
+
+.menu-card {
+  padding: 6rpx 28rpx;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f4f5f7;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.tone-a {
+  background: linear-gradient(135deg, #ff9d7d 0%, #e95f3c 100%);
+}
+
+.tone-b {
+  background: linear-gradient(135deg, #8fc7ff 0%, #4a8de0 100%);
+}
+
+.tone-c {
+  background: linear-gradient(135deg, #ffd36e 0%, #f0a020 100%);
+}
+
+.tone-d {
+  background: linear-gradient(135deg, #9fe3c2 0%, #43b581 100%);
+}
+
+.tone-e {
+  background: linear-gradient(135deg, #c4a7f5 0%, #8a63d2 100%);
+}
+
+.menu-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-label {
+  font-size: 29rpx;
+  font-weight: 600;
+  color: #30343b;
+}
+
+.menu-desc {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #a0a5ad;
+}
+
+.arrow {
+  color: #c3c7cd;
+  font-size: 34rpx;
+}
+
+.logout-card {
+  text-align: center;
+  padding: 26rpx;
+}
+
+.logout-text {
+  font-size: 28rpx;
+  color: #e95f3c;
+}
+
+.footer-tip {
+  padding: 30rpx 0 20rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #b3b8c0;
+}

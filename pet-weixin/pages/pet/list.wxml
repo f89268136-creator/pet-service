@@ -1,0 +1,53 @@
+<view class="pet-page">
+  <view class="page page-with-footer">
+    <view wx:if="{{loading && pets.length === 0}}" class="loading-tip">正在加载宠物档案...</view>
+    <view wx:elif="{{pets.length === 0}}" class="empty">
+      <view class="empty-title">还没有宠物档案</view>
+      <view>添加毛孩子的信息，预约服务时可快速选择</view>
+    </view>
+
+    <view class="pet-card" wx:for="{{pets}}" wx:key="id">
+      <view class="pet-head">
+        <view class="pet-avatar">{{item.initial}}</view>
+        <view class="pet-title">
+          <view class="pet-name">{{item.name}}</view>
+          <view class="pet-tags">
+            <text class="tag tag-primary">{{item.speciesText}}</text>
+            <text class="tag tag-info">{{item.genderText}}</text>
+            <text class="tag tag-muted">{{item.breedText}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="pet-info">
+        <view class="info-cell">
+          <text class="cell-label">生日</text>
+          <text class="cell-value">{{item.birthdayText}}</text>
+        </view>
+        <view class="info-cell">
+          <text class="cell-label">体重</text>
+          <text class="cell-value">{{item.weightText}}</text>
+        </view>
+        <view class="info-cell">
+          <text class="cell-label">绝育</text>
+          <text class="cell-value">{{item.sterilizedText}}</text>
+        </view>
+        <view class="info-cell">
+          <text class="cell-label">免疫</text>
+          <text class="cell-value">{{item.vaccinatedText}}</text>
+        </view>
+      </view>
+
+      <view class="pet-note" wx:if="{{item.note}}">{{item.note}}</view>
+
+      <view class="pet-actions">
+        <button class="btn btn-sm btn-ghost" data-id="{{item.id}}" bindtap="editPet">编辑</button>
+        <button class="btn btn-sm btn-light" data-id="{{item.id}}" bindtap="removePet">删除</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="fixed-bottom">
+    <button class="btn btn-primary btn-block" bindtap="addPet">新增宠物档案</button>
+  </view>
+</view>

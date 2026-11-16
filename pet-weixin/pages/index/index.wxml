@@ -1,0 +1,141 @@
+<view class="home">
+  <view class="top-bg"></view>
+  <view class="page home-body">
+    <view class="store-card" bindtap="goPage" data-url="/pages/store/list">
+      <view class="store-top">
+        <view class="store-logo">{{store ? store.initial : '宠'}}</view>
+        <view class="store-main">
+          <view class="store-name-row">
+            <text class="store-name ellipsis">{{store ? store.name : '宠爱有家宠物服务中心'}}</text>
+            <view class="status-pill {{shopStatus === 1 ? 'open' : 'closed'}}">{{shopStatus === 1 ? '营业中' : '休息中'}}</view>
+          </view>
+          <view class="store-address ellipsis">{{store ? store.address : '暂未获取到门店信息'}}</view>
+          <view class="store-meta" wx:if="{{store}}">
+            <text>营业时间 {{store.openLabel}}</text>
+            <text class="dot">·</text>
+            <text>{{store.phone || '电话待完善'}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="store-foot">
+        <text class="store-desc ellipsis">{{store && store.description ? store.description : '专业宠物洗护、美容、寄养一站式服务'}}</text>
+        <text class="store-link">全部门店</text>
+      </view>
+    </view>
+
+    <view class="quick-grid">
+      <view
+        class="quick-item"
+        wx:for="{{quickEntries}}"
+        wx:key="url"
+        data-url="{{item.url}}"
+        bindtap="goPage"
+      >
+        <view class="quick-icon {{item.tone}}">{{item.icon}}</view>
+        <view class="quick-label">{{item.label}}</view>
+        <view class="quick-desc">{{item.desc}}</view>
+      </view>
+    </view>
+
+    <view class="section-head">
+      <text class="section-title">服务项目</text>
+      <text class="section-more">选择项目后可直接预约</text>
+    </view>
+
+    <scroll-view class="cate-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+      <view class="cate-list">
+        <view
+          class="cate-chip {{activeCategoryId === null ? 'active' : ''}}"
+          data-id=""
+          bindtap="onCategoryTap"
+        >全部</view>
+        <view
+          class="cate-chip {{activeCategoryId === item.id ? 'active' : ''}}"
+          wx:for="{{categories}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onCategoryTap"
+        >{{item.name}}</view>
+      </view>
+    </scroll-view>
+
+    <view wx:if="{{loading || itemsLoading}}" class="loading-tip">正在加载服务项目...</view>
+    <view wx:elif="{{serviceItems.length === 0}}" class="empty">
+      <view class="empty-title">暂无服务项目</view>
+      <view>换一个分类看看，或稍后再来</view>
+    </view>
+    <view wx:else class="service-grid">
+      <view
+        class="service-card"
+        wx:for="{{serviceItems}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="openService"
+      >
+        <view class="service-thumb">
+          <image wx:if="{{item.image}}" class="service-image" src="{{item.image}}" mode="aspectFill" />
+          <view wx:else class="thumb-fallback">{{item.initial}}</view>
+        </view>
+        <view class="service-body">
+          <view class="service-name ellipsis">{{item.name}}</view>
+          <view class="service-desc ellipsis-2">{{item.description || '专业宠物护理服务'}}</view>
+          <view class="service-foot">
+            <text class="price"><text class="price-symbol">¥</text>{{item.priceText}}</text>
+            <text class="book-link">预约</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <block wx:if="{{packages.length > 0}}">
+      <view class="section-head">
+        <text class="section-title">优惠套餐</text>
+        <text class="section-more">套餐请到店咨询</text>
+      </view>
+      <scroll-view class="package-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+        <view class="package-list">
+          <view
+            class="package-card"
+            wx:for="{{packages}}"
+            wx:key="id"
+            data-id="{{item.id}}"
+            data-name="{{item.name}}"
+            bindtap="openPackage"
+          >
+            <view class="package-thumb">
+              <image wx:if="{{item.image}}" class="package-image" src="{{item.image}}" mode="aspectFill" />
+              <view wx:else class="thumb-fallback package-initial">{{item.initial}}</view>
+            </view>
+            <view class="package-body">
+              <view class="package-name ellipsis">{{item.name}}</view>
+              <view class="package-desc ellipsis">{{item.description || '超值服务组合'}}</view>
+              <view class="price package-price"><text class="price-symbol">¥</text>{{item.priceText}}</view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </block>
+
+    <view class="footer-tip">宠爱有家 · 让每一次陪伴更安心</view>
+  </view>
+
+  <view class="modal" wx:if="{{packageModal.visible}}" catchtouchmove="noop">
+    <view class="modal-mask" bindtap="closePackage"></view>
+    <view class="modal-panel">
+      <view class="modal-title">{{packageModal.name}}</view>
+      <view class="modal-sub">套餐包含以下服务项目</view>
+      <scroll-view class="modal-list" scroll-y="true">
+        <view class="pkg-item" wx:for="{{packageModal.items}}" wx:key="name">
+          <view class="pkg-name">
+            <text>{{item.name}}</text>
+            <text class="pkg-copies">x{{item.copies}}</text>
+          </view>
+          <view class="pkg-desc">{{item.description || '门店标准服务项目'}}</view>
+        </view>
+        <view wx:if="{{packageModal.items.length === 0}}" class="empty">套餐明细暂未配置</view>
+      </scroll-view>
+      <view class="modal-tip">套餐暂不支持直接在线预约，请到店咨询或选择单项服务预约。</view>
+      <button class="btn btn-primary btn-block" bindtap="closePackage">知道了</button>
+    </view>
+  </view>
+</view>

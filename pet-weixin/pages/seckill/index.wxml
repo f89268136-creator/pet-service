@@ -1,0 +1,54 @@
+<view class="seckill-page">
+  <view class="banner">
+    <view class="banner-main">
+      <view class="banner-title">限时秒杀</view>
+      <view class="banner-sub">精选服务套餐，限时特惠抢购</view>
+    </view>
+    <view class="banner-link" bindtap="goOrders">我的秒杀订单</view>
+  </view>
+
+  <view class="page">
+    <view wx:if="{{loading && list.length === 0}}" class="loading-tip">正在加载秒杀活动...</view>
+    <view wx:elif="{{list.length === 0}}" class="empty">
+      <view class="empty-title">当前没有进行中的秒杀</view>
+      <view>活动开始后会在这里展示，请稍后再来</view>
+    </view>
+
+    <view class="activity-card" wx:for="{{list}}" wx:key="id">
+      <view class="activity-head">
+        <view class="activity-thumb">{{item.initial}}</view>
+        <view class="activity-main">
+          <view class="activity-name ellipsis">{{item.name}}</view>
+          <view class="activity-setmeal ellipsis">{{item.setmealName}}</view>
+          <view class="activity-time">{{item.timeText}}</view>
+        </view>
+        <view class="tag tag-primary">秒杀</view>
+      </view>
+
+      <view class="price-row">
+        <view class="seckill-price"><text class="price-symbol">¥</text>{{item.seckillText}}</view>
+        <view class="origin-price">原价 ¥{{item.originalText}}</view>
+      </view>
+
+      <view class="stock-row">
+        <view class="stock-bar">
+          <view class="stock-progress" style="width: {{item.soldPercent}}%;"></view>
+        </view>
+        <text class="stock-text">剩余 {{item.remain}} / {{item.stock}}</text>
+      </view>
+
+      <view class="activity-foot">
+        <text class="rule-text">每人限购 {{item.limitPerUser || 1}} 份</text>
+        <button
+          class="btn btn-primary btn-sm grab-btn"
+          data-id="{{item.id}}"
+          bindtap="grab"
+          loading="{{grabbingId === item.id}}"
+          disabled="{{item.disabled || (grabbingId && grabbingId !== item.id)}}"
+        >
+          {{item.disabled ? '已抢光' : '立即抢购'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

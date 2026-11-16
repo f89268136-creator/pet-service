@@ -1,0 +1,56 @@
+<view class="order-page">
+  <scroll-view class="tab-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+    <view class="tab-list">
+      <view
+        class="tab-item {{activeTab === index ? 'active' : ''}}"
+        wx:for="{{tabs}}"
+        wx:key="label"
+        data-index="{{index}}"
+        bindtap="onTabChange"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="page">
+    <view wx:if="{{loading && list.length === 0}}" class="loading-tip">正在加载秒杀订单...</view>
+    <view wx:elif="{{list.length === 0}}" class="empty">
+      <view class="empty-title">还没有秒杀订单</view>
+      <view>去秒杀活动看看有哪些超值套餐</view>
+    </view>
+
+    <view class="order-card" wx:for="{{list}}" wx:key="id">
+      <view class="order-head">
+        <text class="order-no">{{item.orderNo}}</text>
+        <text class="tag tag-{{item.statusClass}}">{{item.statusText}}</text>
+      </view>
+
+      <view class="order-body">
+        <view class="order-thumb">{{item.initial}}</view>
+        <view class="order-main">
+          <view class="order-name ellipsis">{{item.setmealName}}</view>
+          <view class="order-meta ellipsis">{{item.activityName}}</view>
+          <view class="order-meta">{{item.timeText}}</view>
+        </view>
+        <view class="order-price"><text class="price-symbol">¥</text>{{item.amountText}}</view>
+      </view>
+
+      <view class="verify-row" wx:if="{{item.showVerify}}">
+        <text class="verify-label">核销码</text>
+        <text class="verify-code">{{item.verifyCode}}</text>
+      </view>
+
+      <view class="order-foot">
+        <text class="foot-tip">{{item.canPay ? '请尽快完成支付' : '到店出示核销码使用'}}</text>
+        <button
+          wx:if="{{item.canPay}}"
+          class="btn btn-sm btn-primary"
+          data-orderno="{{item.orderNo}}"
+          bindtap="pay"
+        >立即支付</button>
+      </view>
+    </view>
+
+    <view wx:if="{{list.length > 0 && loading}}" class="load-more">加载中...</view>
+    <view wx:elif="{{list.length > 0 && finished}}" class="load-more">没有更多订单了</view>
+  </view>
+</view>

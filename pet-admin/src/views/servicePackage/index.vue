@@ -1,0 +1,361 @@
+<template>
+  <div class="dashboard-container">
+    <div class="container">
+      <div class="tableBar">
+        <label style="margin-right: 10px">服务套餐名称：</label>
+        <el-input v-model="input"
+                  placeholder="请填写服务套餐名称"
+                  style="width: 14%"
+                  clearable
+                  @clear="init"
+                  @keyup.enter.native="initFun" />
+
+        <label style="margin-right: 10px; margin-left: 20px">服务套餐分类：</label>
+        <el-select v-model="categoryId"
+                   style="width: 14%"
+                   placeholder="请选择"
+                   clearable
+                   @clear="init">
+          <el-option v-for="item in categoryOptions"
+                     :key="item.value"
+                     :label="item.label"
+                     :value="item.value" />
+        </el-select>
+
+        <label style="margin-right: 10px; margin-left: 20px">上架状态：</label>
+        <el-select v-model="statusFilter"
+                   style="width: 14%"
+                   placeholder="请选择"
+                   clearable
+                   @clear="init">
+          <el-option v-for="item in saleStatus"
+                     :key="item.value"
+                     :label="item.label"
+                     :value="item.value" />
+        </el-select>
+        <el-button class="normal-btn continue"
+                   @click="init(true)">
+          查询
+        </el-button>
+        <div class="tableLab">
+          <span class="delBut non"
+                @click="deleteHandle('批量')">批量删除</span>
+          <el-button type="primary"
+                     style="margin-left: 15px"
+                     @click="handleAdd('add')">
+            + 新建服务套餐
+          </el-button>
+        </div>
+      </div>
+      <el-table v-if="tableData.length"
+                :data="tableData"
+                stripe
+                class="tableBox"
+                @selection-change="handleSelectionChange">
+        <el-table-column type="selection"
+                         width="25" />
+        <el-table-column prop="name"
+                         label="服务套餐名称" />
+        <el-table-column prop="image"
+                         label="图片">
+          <template slot-scope="{ row }">
+            <el-image style="width: 80px; height: 40px; border: none; cursor: pointer"
+                      :src="row.image">
+              <div slot="error"
+                   class="image-slot">
+                <img src="./../../assets/noImg.png"
+                     style="width: auto; height: 40px; border: none">
+              </div>
+            </el-image>
+          </template>
+        </el-table-column>
+        <el-table-column prop="categoryName"
+                         label="服务套餐分类" />
+        <el-table-column prop="price"
+                         label="服务套餐价格">
+          <template slot-scope="scope">
+            <span>￥{{ ((scope.row.price ).toFixed(2) * 100) / 100 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="上架状态">
+          <template slot-scope="scope">
+            <div class="tableColumn-status"
+                 :class="{ 'stop-use': String(scope.row.status) === '0' }">
+              {{ String(scope.row.status) === '0' ? '已下架' : '已上架' }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="updateTime"
+                         label="最后操作时间" />
+        <el-table-column label="操作"
+                         width="250"
+                         align="center">
+          <template slot-scope="scope">
+            <el-button type="text"
+                       size="small"
+                       class="blueBug"
+                       @click="handleAdd(scope.row)">
+              修改
+            </el-button>
+            <el-button type="text"
+                       size="small"
+                       class="delBut"
+                       @click="deleteHandle('单删', scope.row.id)">
+              删除
+            </el-button>
+            <el-button type="text"
+                       size="small"
+                       class="blueBug non"
+                       :class="{
+                         blueBug: scope.row.status == '0',
+                         delBut: scope.row.status != '0'
+                       }"
+                       @click="statusHandle(scope.row)">
+              {{ scope.row.status == '0' ? '上架' : '下架' }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <Empty v-else
+             :is-search="isSearch" />
+      <el-pagination v-if="counts > 10"
+                     class="pageList"
+                     :page-sizes="[10, 20, 30, 40]"
+                     :page-size="pageSize"
+                     layout="total, sizes, prev, pager, next, jumper"
+                     :total="counts"
+                     @size-change="handleSizeChange"
+                     @current-change="handleCurrentChange" />
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import {
+  getServicePackagePage,
+  deleteServicePackage,
+  servicePackageStatusByStatus,
+  servicePackageCategoryList
+} from '@/api/servicePackage'
+import Empty from '@/components/Empty/index.vue'
+
+@Component({
+  name: 'ServicePackage',
+  components: {
+    Empty
+  }
+})
+export default class extends Vue {
+  private input: any = ''
+  private counts: number = 0
+  private page: number = 1
+  private pageSize: number = 10
+  private checkList: any[] = []
+  private tableData: [] = []
+  private categoryOptions = []
+  private categoryId = ''
+  private statusFilter = ''
+  private isSearch: boolean = false
+  private saleStatus: any = [
+    {
+      value: 0,
+      label: '已下架'
+    },
+    {
+      value: 1,
+      label: '已上架'
+    }
+  ]
+
+  created() {
+    this.init()
+    this.getCategoryOptions()
+  }
+
+  initFun() {
+    this.page = 1
+    this.init()
+  }
+
+  private async init(isSearch?) {
+    this.isSearch = isSearch
+    await getServicePackagePage({
+      page: this.page,
+      pageSize: this.pageSize,
+      name: this.input || undefined,
+      categoryId: this.categoryId || undefined,
+      status: this.statusFilter
+    })
+      .then(res => {
+        if (res && res.data && res.data.code === 1) {
+          this.tableData = res.data.data.records
+          this.counts = Number(res.data.data.total)
+        } else {
+          this.$message.error(res.data.msg)
+        }
+      })
+      .catch(err => {
+        this.$message.error('请求出错了：' + err.message)
+      })
+  }
+
+  // 添加更改
+  private handleAdd(st: any) {
+    if (st === 'add') {
+      this.$router.push({ path: '/service-package/add' })
+    } else {
+      this.$router.push({ path: '/service-package/add', query: { id: st.id } })
+    }
+  }
+
+  // 删除
+  private deleteHandle(type: string, id?: any) {
+    if (type === '批量' && this.checkList.length === 0) {
+      return this.$message.error('请选择删除对象')
+    }
+    this.$confirm('确定删除该服务套餐?', '确定删除', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      deleteServicePackage(type === '批量' ? this.checkList.join(',') : id)
+        .then(res => {
+          if (res.data.code === 1) {
+            this.$message.success('删除成功！')
+            this.init()
+          } else {
+            this.$message.error(res.data.msg)
+          }
+        })
+        .catch(err => {
+          this.$message.error('请求出错了：' + err.message)
+        })
+    })
+  }
+
+  //状态更改
+  private statusHandle(row: any) {
+    let params: any = {}
+    if (typeof row === 'string') {
+      if (this.checkList.length == 0) {
+        this.$message.error('批量操作，请先勾选操作服务套餐！')
+        return false
+      }
+      params.ids = this.checkList.join(',')
+      params.status = row
+    } else {
+      params.ids = row.id
+      params.status = row.status ? '0' : '1'
+    }
+
+    this.$confirm('确认更改该服务套餐状态?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      servicePackageStatusByStatus(params)
+        .then(res => {
+          if (res.data.code === 1) {
+            this.$message.success('服务套餐状态已经更改成功！')
+            this.init()
+          } else {
+            this.$message.error(res.data.msg)
+          }
+        })
+        .catch(err => {
+          this.$message.error('请求出错了：' + err.message)
+        })
+    })
+  }
+
+  //获取服务套餐分类下拉数据
+  private getCategoryOptions() {
+    servicePackageCategoryList({
+      type: 2
+    })
+      .then(res => {
+        if (res && res.data && res.data.code === 1) {
+          this.categoryOptions = (
+            res.data &&
+            res.data.data &&
+            res.data.data
+          ).map(item => {
+            return { value: item.id, label: item.name }
+          })
+        }
+      })
+      .catch(() => {})
+  }
+
+  // 全部操作
+  private handleSelectionChange(val: any) {
+    let checkArr: string[] = []
+    val.forEach((n: any) => {
+      checkArr.push(n.id)
+    })
+    this.checkList = checkArr
+  }
+
+  private handleSizeChange(val: any) {
+    this.pageSize = val
+    this.init()
+  }
+
+  private handleCurrentChange(val: any) {
+    this.page = val
+    this.init()
+  }
+}
+</script>
+<style lang="scss">
+.el-table-column--selection .cell {
+  padding-left: 10px;
+}
+</style>
+<style lang="scss" scoped>
+.dashboard {
+  &-container {
+    margin: 30px;
+
+    .container {
+      background: #fff;
+      position: relative;
+      z-index: 1;
+      padding: 30px 28px;
+      border-radius: 4px;
+
+      .tableBar {
+        margin-bottom: 20px;
+        .tableLab {
+          float: right;
+          span {
+            cursor: pointer;
+            display: inline-block;
+            font-size: 14px;
+            padding: 0 20px;
+            color: $gray-2;
+          }
+        }
+      }
+
+      .tableBox {
+        width: 100%;
+        border: 1px solid $gray-5;
+        border-bottom: 0;
+      }
+
+      .pageList {
+        text-align: center;
+        margin-top: 30px;
+      }
+      //查询黑色按钮样式
+      .normal-btn {
+        background: #333333;
+        color: white;
+        margin-left: 20px;
+      }
+    }
+  }
+}
+</style>

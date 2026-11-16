@@ -1,0 +1,111 @@
+<view class="page page-with-footer" wx:if="{{service}}">
+  <view class="card service-card">
+    <view class="service-thumb">{{service.initial}}</view>
+    <view class="service-info">
+      <view class="service-name ellipsis">{{service.name}}</view>
+      <view class="muted">{{service.categoryName || '专业宠物服务'}}</view>
+      <view class="price service-price"><text class="price-symbol">¥</text>{{service.priceText}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-item">
+      <text class="form-label">服务门店</text>
+      <picker
+        class="flex-1"
+        mode="selector"
+        range="{{storeNames}}"
+        value="{{storeIndex}}"
+        bindchange="onStoreChange"
+        disabled="{{storeNames.length === 0}}"
+      >
+        <view class="form-value {{storeNames.length === 0 ? 'form-placeholder' : ''}}">
+          {{storeNames.length > 0 ? storeNames[storeIndex] : '暂无可预约门店'}}
+        </view>
+      </picker>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">预约日期</text>
+      <picker class="flex-1" mode="date" value="{{date}}" start="{{minDate}}" end="{{maxDate}}" bindchange="onDateChange">
+        <view class="form-value">{{date}}</view>
+      </picker>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="slot-block">
+      <view class="row-between slot-head">
+        <text class="form-label">预约时段</text>
+        <text class="muted" wx:if="{{slots.length > 0}}">余量实时更新</text>
+      </view>
+      <view wx:if="{{slotsLoading}}" class="loading-tip">正在查询可预约时段...</view>
+      <view wx:elif="{{slots.length === 0}}" class="slot-empty">当天暂无可预约时段，请更换日期或门店</view>
+      <view wx:else class="slot-grid">
+        <view
+          class="slot-chip {{selectedSlotId === item.id ? 'active' : ''}} {{item.disabled ? 'disabled' : ''}}"
+          wx:for="{{slots}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-disabled="{{item.disabled}}"
+          bindtap="selectSlot"
+        >
+          <view class="slot-time">{{item.label}}</view>
+          <view class="slot-left">{{item.disabled ? '已约满' : '剩余 ' + item.remaining + ' 位'}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">服务宠物</text>
+      <picker
+        wx:if="{{pets.length > 0}}"
+        class="flex-1"
+        mode="selector"
+        range="{{pets}}"
+        range-key="name"
+        value="{{petIndex}}"
+        bindchange="onPetChange"
+      >
+        <view class="form-value">{{pets[petIndex].name}} · {{pets[petIndex].speciesText}}</view>
+      </picker>
+      <view wx:else class="flex-1 form-value link" bindtap="addPet">还没有宠物档案，去添加</view>
+      <text class="arrow" wx:if="{{pets.length > 0}}">›</text>
+    </view>
+
+    <view class="remark-block">
+      <text class="form-label remark-label">备注</text>
+      <textarea
+        class="remark-input"
+        maxlength="200"
+        placeholder="选填，如宠物性格、特殊需求"
+        placeholder-class="form-placeholder"
+        value="{{remark}}"
+        bindinput="onRemarkInput"
+      />
+      <view class="remark-count">{{remark.length}}/200</view>
+    </view>
+  </view>
+
+  <view class="tips">
+    <view class="tip-line">预约成功后可在「我的预约」中查看进度</view>
+    <view class="tip-line">到店后请出示核销码，由门店开始服务</view>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty">
+    <view class="empty-title">服务信息加载中</view>
+    <view>请稍候，若长时间无响应请返回重试</view>
+  </view>
+</view>
+
+<view class="fixed-bottom" wx:if="{{service}}">
+  <view class="footer-bar">
+    <view class="amount">
+      <text class="amount-label">服务价</text>
+      <text class="amount-value"><text class="price-symbol">¥</text>{{service.priceText}}</text>
+    </view>
+    <button class="btn btn-primary" bindtap="submit" loading="{{submitting}}" disabled="{{submitting}}">提交预约</button>
+  </view>
+</view>

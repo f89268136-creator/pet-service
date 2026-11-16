@@ -1,0 +1,138 @@
+.order-page {
+  min-height: 100vh;
+}
+
+.tab-scroll {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #ffffff;
+  white-space: nowrap;
+  box-shadow: 0 4rpx 12rpx rgba(32, 35, 42, 0.04);
+}
+
+.tab-list {
+  display: inline-flex;
+  padding: 18rpx 20rpx;
+}
+
+.tab-item {
+  display: inline-flex;
+  align-items: center;
+  height: 60rpx;
+  padding: 0 28rpx;
+  margin-right: 12rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #6f747d;
+  background: #f5f6f8;
+}
+
+.tab-item.active {
+  background: #fff1ec;
+  color: #e95f3c;
+  font-weight: 600;
+}
+
+.order-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 26rpx;
+  margin-bottom: 22rpx;
+  box-shadow: 0 8rpx 24rpx rgba(32, 35, 42, 0.05);
+}
+
+.order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18rpx;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+
+.order-no {
+  font-size: 23rpx;
+  color: #9aa0a8;
+}
+
+.order-body {
+  display: flex;
+  align-items: center;
+  padding: 22rpx 0;
+}
+
+.order-thumb {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #fff2ec 0%, #ffddd1 100%);
+  color: #d98d75;
+  font-size: 40rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.order-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.order-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #20232a;
+}
+
+.order-meta {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: #8a8f99;
+}
+
+.order-price {
+  margin-left: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #e95f3c;
+  flex-shrink: 0;
+}
+
+.verify-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  border-radius: 14rpx;
+  background: #fffaf8;
+  border: 1rpx dashed #f3b39e;
+}
+
+.verify-label {
+  font-size: 24rpx;
+  color: #a0604a;
+}
+
+.verify-code {
+  font-size: 34rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  color: #e95f3c;
+}
+
+.order-foot {
+  margin-top: 18rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #f2f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.foot-tip {
+  font-size: 23rpx;
+  color: #9aa0a8;
+}

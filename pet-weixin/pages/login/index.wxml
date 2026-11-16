@@ -1,0 +1,41 @@
+<view class="login">
+  <view class="hero">
+    <view class="hero-mark">宠</view>
+    <view class="brand">宠爱有家</view>
+    <view class="slogan">宠物洗护 · 美容 · 寄养 · 上门服务预约</view>
+  </view>
+
+  <view class="login-card">
+    <view class="card-title">欢迎回来</view>
+    <view class="card-sub">登录后可预约服务、管理宠物档案、参与社区互动</view>
+
+    <button class="btn btn-primary btn-block login-btn" bindtap="wxLogin" loading="{{wxLoading}}" disabled="{{devLoading}}">
+      微信一键登录
+    </button>
+
+    <view class="or">
+      <view class="line"></view>
+      <text class="or-text">或使用演示手机号</text>
+      <view class="line"></view>
+    </view>
+
+    <view class="phone-box">
+      <input
+        class="phone-input"
+        type="number"
+        maxlength="11"
+        placeholder="请输入11位手机号"
+        placeholder-class="form-placeholder"
+        value="{{phone}}"
+        bindinput="onPhoneInput"
+      />
+      <button class="btn btn-light btn-sm phone-btn" bindtap="devLogin" loading="{{devLoading}}" disabled="{{wxLoading}}">
+        登录
+      </button>
+    </view>
+
+    <view class="hint">
+      微信登录需要小程序 appid 与后端 pet.wechat 配置一致；本地联调推荐使用演示手机号登录。
+    </view>
+  </view>
+</view>

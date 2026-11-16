@@ -1,0 +1,97 @@
+<view class="page page-with-footer">
+  <view class="card">
+    <view class="form-item">
+      <text class="form-label">宠物名字</text>
+      <input
+        class="form-input"
+        maxlength="20"
+        placeholder="请输入宠物名字"
+        placeholder-class="form-placeholder"
+        value="{{name}}"
+        bindinput="onNameInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">宠物类型</text>
+      <picker class="flex-1" mode="selector" range="{{speciesOptions}}" range-key="label" value="{{speciesIndex}}" bindchange="onSpeciesChange">
+        <view class="form-value">{{speciesOptions[speciesIndex].label}}</view>
+      </picker>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">品种</text>
+      <input
+        class="form-input"
+        maxlength="30"
+        placeholder="如柯基、英短（选填）"
+        placeholder-class="form-placeholder"
+        value="{{breed}}"
+        bindinput="onBreedInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">性别</text>
+      <radio-group class="gender-group" bindchange="onGenderChange">
+        <label class="gender-option" wx:for="{{genderOptions}}" wx:key="value">
+          <radio value="{{item.value}}" checked="{{gender === item.value}}" color="#E95F3C" />
+          <text class="gender-text">{{item.label}}</text>
+        </label>
+      </radio-group>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">生日</text>
+      <picker class="flex-1" mode="date" value="{{birthday || endDate}}" start="2000-01-01" end="{{endDate}}" bindchange="onBirthdayChange">
+        <view class="form-value {{birthday ? '' : 'form-placeholder'}}">{{birthdayDisplay}}</view>
+      </picker>
+      <text wx:if="{{birthday}}" class="clear-link" bindtap="clearBirthday">清除</text>
+      <text wx:else class="arrow">›</text>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">体重（kg）</text>
+      <input
+        class="form-input"
+        type="digit"
+        maxlength="6"
+        placeholder="请输入体重（选填）"
+        placeholder-class="form-placeholder"
+        value="{{weight}}"
+        bindinput="onWeightInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">是否绝育</text>
+      <view class="flex-1"></view>
+      <switch checked="{{sterilized}}" color="#E95F3C" bindchange="onSterilizedChange" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">是否免疫</text>
+      <view class="flex-1"></view>
+      <switch checked="{{vaccinated}}" color="#E95F3C" bindchange="onVaccinatedChange" />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-label note-label">备注</view>
+    <textarea
+      class="note-input"
+      maxlength="200"
+      placeholder="如性格、过敏史、护理注意事项（选填）"
+      placeholder-class="form-placeholder"
+      value="{{note}}"
+      bindinput="onNoteInput"
+    />
+  </view>
+</view>
+
+<view class="fixed-bottom">
+  <button class="btn btn-primary btn-block" bindtap="save" loading="{{saving}}" disabled="{{saving}}">
+    {{isEdit ? '保存修改' : '创建档案'}}
+  </button>
+</view>

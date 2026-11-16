@@ -1,0 +1,154 @@
+.status-hero {
+  padding: 52rpx 40rpx 92rpx;
+  color: #ffffff;
+  background: linear-gradient(135deg, #e95f3c 0%, #f4876a 100%);
+}
+
+.hero-warn {
+  background: linear-gradient(135deg, #f0a020 0%, #f6c05a 100%);
+}
+
+.hero-info {
+  background: linear-gradient(135deg, #4a8de0 0%, #7db3f2 100%);
+}
+
+.hero-primary {
+  background: linear-gradient(135deg, #e95f3c 0%, #f4876a 100%);
+}
+
+.hero-success {
+  background: linear-gradient(135deg, #2f9e58 0%, #5cc987 100%);
+}
+
+.hero-muted {
+  background: linear-gradient(135deg, #8a8f99 0%, #b0b5bd 100%);
+}
+
+.status-text {
+  font-size: 46rpx;
+  font-weight: 700;
+}
+
+.status-sub {
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  opacity: 0.9;
+}
+
+.detail .page {
+  margin-top: -58rpx;
+  position: relative;
+}
+
+.verify-card {
+  text-align: center;
+  border: 2rpx dashed #f3b39e;
+  background: #fffaf8;
+}
+
+.verify-label {
+  font-size: 25rpx;
+  color: #a0604a;
+}
+
+.verify-code {
+  margin: 14rpx 0 10rpx;
+  font-size: 60rpx;
+  font-weight: 700;
+  letter-spacing: 10rpx;
+  color: #e95f3c;
+}
+
+.service-head {
+  display: flex;
+  align-items: center;
+}
+
+.thumb {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 22rpx;
+  background: linear-gradient(135deg, #fff2ec 0%, #ffddd1 100%);
+  color: #d98d75;
+  font-size: 42rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.head-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.service-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #20232a;
+}
+
+.head-price {
+  margin-left: 16rpx;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #e95f3c;
+  flex-shrink: 0;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 14rpx 0;
+}
+
+.info-key {
+  width: 150rpx;
+  flex-shrink: 0;
+  font-size: 25rpx;
+  color: #8a8f99;
+}
+
+.info-val {
+  flex: 1;
+  font-size: 26rpx;
+  color: #30343b;
+  text-align: right;
+  word-break: break-all;
+}
+
+.price-text {
+  color: #e95f3c;
+  font-weight: 600;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 26rpx;
+  font-size: 28rpx;
+  color: #30343b;
+}
+
+.arrow {
+  color: #c3c7cd;
+  font-size: 34rpx;
+}
+
+.footer-bar {
+  width: 100%;
+}
+
+.action-btn {
+  flex: 1;
+  margin: 0;
+}
+
+.action-btn + .action-btn {
+  margin-left: 20rpx;
+}

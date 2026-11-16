@@ -1,0 +1,75 @@
+<view class="mine-page">
+  <view class="profile">
+    <view class="profile-main">
+      <view class="avatar">我</view>
+      <view class="profile-info">
+        <view class="profile-name">{{displayName}}</view>
+        <view class="profile-phone">{{phoneText}}</view>
+        <view class="profile-id" wx:if="{{user && user.id}}">用户编号 {{user.id}}</view>
+      </view>
+    </view>
+    <view class="profile-badge">宠爱会员</view>
+  </view>
+
+  <view class="page mine-body">
+    <view class="card sign-card">
+      <view class="sign-head">
+        <view>
+          <view class="sign-title">每日签到</view>
+          <view class="muted">{{stats && stats.monthText ? stats.monthText + ' 签到统计' : '签到可获取积分'}}</view>
+        </view>
+        <button
+          class="btn btn-sm sign-btn {{stats && stats.signedToday ? 'signed' : 'btn-primary'}}"
+          bindtap="signIn"
+          loading="{{signing}}"
+          disabled="{{signing || (stats && stats.signedToday)}}"
+        >
+          {{stats && stats.signedToday ? '今日已签到' : '立即签到'}}
+        </button>
+      </view>
+
+      <view class="sign-stats">
+        <view class="stat-cell">
+          <view class="stat-value">{{stats ? stats.signedDaysText : 0}}</view>
+          <view class="stat-label">本月签到（天）</view>
+        </view>
+        <view class="stat-cell">
+          <view class="stat-value">{{stats ? stats.continuousDaysText : 0}}</view>
+          <view class="stat-label">连续签到（天）</view>
+        </view>
+        <view class="stat-cell">
+          <view class="stat-value highlight">{{stats ? stats.pointsText : 0}}</view>
+          <view class="stat-label">当前积分</view>
+        </view>
+      </view>
+
+      <view class="sign-tip" wx:if="{{stats && stats.todayPointsText > 0}}">
+        今日签到已获得 {{stats.todayPointsText}} 积分
+      </view>
+    </view>
+
+    <view class="card menu-card">
+      <view
+        class="menu-item"
+        wx:for="{{menus}}"
+        wx:key="url"
+        data-url="{{item.url}}"
+        data-tab="{{item.tab}}"
+        bindtap="goMenu"
+      >
+        <view class="menu-icon {{item.tone}}">{{item.icon}}</view>
+        <view class="menu-main">
+          <view class="menu-label">{{item.label}}</view>
+          <view class="menu-desc">{{item.desc}}</view>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <view class="card logout-card" bindtap="logout">
+      <text class="logout-text">退出登录</text>
+    </view>
+
+    <view class="footer-tip">宠爱有家 · 宠物服务预约平台</view>
+  </view>
+</view>

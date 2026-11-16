@@ -1,0 +1,49 @@
+<view class="detail" wx:if="{{service}}">
+  <view class="hero">
+    <image wx:if="{{service.image}}" class="hero-image" src="{{service.image}}" mode="aspectFill" />
+    <view wx:else class="hero-fallback">{{service.initial}}</view>
+  </view>
+
+  <view class="page page-with-footer">
+    <view class="card intro-card">
+      <view class="row-between">
+        <view class="name">{{service.name}}</view>
+        <view class="price name-price"><text class="price-symbol">¥</text>{{service.priceText}}</view>
+      </view>
+      <view class="tags">
+        <text class="tag tag-primary">到店服务</text>
+        <text class="tag tag-info">专业护理</text>
+        <text class="tag tag-success" wx:if="{{service.categoryName}}">{{service.categoryName}}</text>
+      </view>
+      <view class="divider"></view>
+      <view class="desc-title">服务介绍</view>
+      <view class="desc">{{service.description || '由专业宠物护理师提供标准化服务，具体内容可到店咨询。'}}</view>
+    </view>
+
+    <view class="card">
+      <view class="info-title">预约须知</view>
+      <view class="info-item">
+        <text class="info-index">1</text>
+        <text class="info-text">请选择门店、日期与可预约时段，提交后完成支付。</text>
+      </view>
+      <view class="info-item">
+        <text class="info-index">2</text>
+        <text class="info-text">预约成功后请按预约时段到店，凭核销码开始服务。</text>
+      </view>
+      <view class="info-item">
+        <text class="info-index">3</text>
+        <text class="info-text">服务开始前可取消预约，退款以门店规则为准。</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fixed-bottom">
+    <view class="footer-bar">
+      <view class="amount">
+        <text class="amount-label">服务价</text>
+        <text class="amount-value"><text class="price-symbol">¥</text>{{service.priceText}}</text>
+      </view>
+      <button class="btn btn-primary" bindtap="book">立即预约</button>
+    </view>
+  </view>
+</view>

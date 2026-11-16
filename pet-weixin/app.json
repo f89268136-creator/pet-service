@@ -1,0 +1,60 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/index",
+    "pages/service/detail",
+    "pages/appointment/submit",
+    "pages/appointment/list",
+    "pages/appointment/detail",
+    "pages/pet/list",
+    "pages/pet/edit",
+    "pages/community/index",
+    "pages/community/detail",
+    "pages/community/publish",
+    "pages/seckill/index",
+    "pages/seckill/order",
+    "pages/store/list",
+    "pages/mine/index"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "宠爱有家",
+    "navigationBarBackgroundColor": "#E95F3C",
+    "backgroundColor": "#F8F8F8",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#8A8A8A",
+    "selectedColor": "#E95F3C",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/appointment/list",
+        "text": "预约"
+      },
+      {
+        "pagePath": "pages/community/index",
+        "text": "社区"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于查询距离您最近的宠物服务门店"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

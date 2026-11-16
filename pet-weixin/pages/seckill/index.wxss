@@ -1,0 +1,149 @@
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 44rpx 32rpx 60rpx;
+  background: linear-gradient(135deg, #e95f3c 0%, #f4876a 100%);
+  color: #ffffff;
+}
+
+.banner-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.banner-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.banner-link {
+  padding: 12rpx 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.45);
+  font-size: 24rpx;
+  flex-shrink: 0;
+}
+
+.seckill-page .page {
+  margin-top: -30rpx;
+  position: relative;
+}
+
+.activity-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 26rpx;
+  margin-bottom: 22rpx;
+  box-shadow: 0 8rpx 24rpx rgba(32, 35, 42, 0.06);
+}
+
+.activity-head {
+  display: flex;
+  align-items: center;
+}
+
+.activity-thumb {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 22rpx;
+  background: linear-gradient(135deg, #fff2ec 0%, #ffddd1 100%);
+  color: #d98d75;
+  font-size: 42rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.activity-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-name {
+  font-size: 31rpx;
+  font-weight: 600;
+  color: #20232a;
+}
+
+.activity-setmeal {
+  margin-top: 4rpx;
+  font-size: 25rpx;
+  color: #6f747d;
+}
+
+.activity-time {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #a0a5ad;
+}
+
+.price-row {
+  margin-top: 22rpx;
+  display: flex;
+  align-items: baseline;
+}
+
+.seckill-price {
+  color: #e95f3c;
+  font-size: 46rpx;
+  font-weight: 700;
+}
+
+.origin-price {
+  margin-left: 16rpx;
+  font-size: 24rpx;
+  color: #a0a5ad;
+  text-decoration: line-through;
+}
+
+.stock-row {
+  margin-top: 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.stock-bar {
+  flex: 1;
+  height: 12rpx;
+  border-radius: 6rpx;
+  background: #f3f4f6;
+  overflow: hidden;
+  margin-right: 18rpx;
+}
+
+.stock-progress {
+  height: 12rpx;
+  border-radius: 6rpx;
+  background: linear-gradient(90deg, #f6a17f 0%, #e95f3c 100%);
+}
+
+.stock-text {
+  font-size: 22rpx;
+  color: #8a8f99;
+  flex-shrink: 0;
+}
+
+.activity-foot {
+  margin-top: 22rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f2f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rule-text {
+  font-size: 22rpx;
+  color: #9aa0a8;
+}
+
+.grab-btn {
+  padding: 0 34rpx;
+}

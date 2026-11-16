@@ -1,0 +1,35 @@
+<view class="page page-with-footer">
+  <view class="card">
+    <textarea
+      class="content-input"
+      maxlength="500"
+      auto-height="true"
+      placeholder="分享毛孩子的日常、护理心得或到店体验..."
+      placeholder-class="form-placeholder"
+      value="{{content}}"
+      bindinput="onContentInput"
+    />
+    <view class="content-count">{{content.length}}/500</view>
+  </view>
+
+  <view class="card">
+    <view class="form-item">
+      <text class="form-label">关联宠物</text>
+      <picker class="flex-1" mode="selector" range="{{petOptions}}" range-key="name" value="{{petIndex}}" bindchange="onPetChange">
+        <view class="form-value">{{petOptions[petIndex].name}}</view>
+      </picker>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <view class="tips">
+    <view class="tip-line">社区会展示在「最新」与「热门」信息流中</view>
+    <view class="tip-line">当前版本支持文字动态，图片动态需后端提供上传接口后开启</view>
+  </view>
+</view>
+
+<view class="fixed-bottom">
+  <button class="btn btn-primary btn-block" bindtap="publish" loading="{{submitting}}" disabled="{{submitting}}">
+    发布动态
+  </button>
+</view>

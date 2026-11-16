@@ -1,0 +1,28 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.log
+logs/
+
+# Node
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 小程序开发者工具
+pet-weixin/project.private.config.json
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.history
+*.suo
+
+# 系统
+.DS_Store
+Thumbs.db

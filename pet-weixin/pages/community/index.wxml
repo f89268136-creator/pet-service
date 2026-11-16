@@ -1,0 +1,62 @@
+<view class="community-page">
+  <view class="top-bar">
+    <view class="sort-tabs">
+      <text class="sort-item {{sort === 'time' ? 'active' : ''}}" data-sort="time" bindtap="changeSort">最新</text>
+      <text class="sort-item {{sort === 'hot' ? 'active' : ''}}" data-sort="hot" bindtap="changeSort">热门</text>
+    </view>
+    <view class="publish-link" bindtap="publish">发布动态</view>
+  </view>
+
+  <view class="page community-body">
+    <view wx:if="{{loading && list.length === 0}}" class="loading-tip">正在加载社区动态...</view>
+    <view wx:elif="{{list.length === 0}}" class="empty">
+      <view class="empty-title">社区还很安静</view>
+      <view>发布第一条动态，分享毛孩子的日常</view>
+    </view>
+
+    <view class="post-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="openDetail">
+      <view class="post-head">
+        <view class="avatar">{{item.initial}}</view>
+        <view class="head-main">
+          <view class="user-name">{{item.userName || '宠物家长'}}</view>
+          <view class="post-time">{{item.timeText}}</view>
+        </view>
+        <view class="post-tags">
+          <text class="tag tag-primary" wx:if="{{item.petName}}">{{item.petName}}</text>
+          <text class="tag tag-info" wx:if="{{item.storeName}}">{{item.storeName}}</text>
+        </view>
+      </view>
+
+      <view class="post-content">{{item.content}}</view>
+
+      <view class="image-grid" wx:if="{{item.images.length > 0}}">
+        <image
+          class="feed-image"
+          wx:for="{{item.images}}"
+          wx:for-item="img"
+          wx:for-index="imgIndex"
+          wx:key="*this"
+          src="{{img}}"
+          mode="aspectFill"
+          data-id="{{item.id}}"
+          data-src="{{img}}"
+          catchtap="previewImage"
+        />
+      </view>
+
+      <view class="post-foot">
+        <view class="feed-action {{item.liked ? 'liked' : ''}}" data-id="{{item.id}}" catchtap="toggleLike">
+          <text class="action-icon">赞</text>
+          <text class="action-count">{{item.likeCount || 0}}</text>
+        </view>
+        <view class="feed-action" data-id="{{item.id}}" catchtap="openDetail">
+          <text class="action-icon">评</text>
+          <text class="action-count">{{item.commentCount || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{list.length > 0 && loading}}" class="load-more">加载中...</view>
+    <view wx:elif="{{list.length > 0 && finished}}" class="load-more">没有更多动态了</view>
+  </view>
+</view>

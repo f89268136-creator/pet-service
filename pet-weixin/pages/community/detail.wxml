@@ -1,0 +1,79 @@
+<view wx:if="{{post}}" class="detail">
+  <view class="page comment-page">
+    <view class="card">
+      <view class="post-head">
+        <view class="avatar">{{post.initial}}</view>
+        <view class="head-main">
+          <view class="user-name">{{post.userName || '宠物家长'}}</view>
+          <view class="post-time">{{post.timeText}}</view>
+        </view>
+        <view class="post-tags">
+          <text class="tag tag-primary" wx:if="{{post.petName}}">{{post.petName}}</text>
+          <text class="tag tag-info" wx:if="{{post.storeName}}">{{post.storeName}}</text>
+        </view>
+      </view>
+
+      <view class="post-content">{{post.content}}</view>
+
+      <view class="image-grid" wx:if="{{post.images.length > 0}}">
+        <image
+          class="feed-image"
+          wx:for="{{post.images}}"
+          wx:for-item="img"
+          wx:for-index="imgIndex"
+          wx:key="*this"
+          src="{{img}}"
+          mode="aspectFill"
+          data-src="{{img}}"
+          bindtap="previewImage"
+        />
+      </view>
+
+      <view class="post-foot">
+        <view class="feed-action {{post.liked ? 'liked' : ''}}" bindtap="toggleLike">
+          <text class="action-icon">赞</text>
+          <text>{{post.likeCount || 0}}</text>
+        </view>
+        <view class="feed-action">
+          <text class="action-icon">评</text>
+          <text>{{post.commentCount || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="comment-title">全部评论（{{comments.length}}）</view>
+      <view wx:if="{{comments.length === 0}}" class="comment-empty">还没有评论，来聊两句吧</view>
+      <view class="comment-item" wx:for="{{comments}}" wx:key="id">
+        <view class="comment-avatar">{{item.initial}}</view>
+        <view class="comment-main">
+          <view class="comment-head">
+            <text class="comment-name">{{item.userName || '宠物家长'}}</text>
+            <text class="comment-time">{{item.timeText}}</text>
+          </view>
+          <view class="comment-content">{{item.content}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="fixed-bottom comment-bar">
+    <input
+      class="comment-input"
+      maxlength="200"
+      placeholder="说点什么..."
+      placeholder-class="form-placeholder"
+      value="{{content}}"
+      bindinput="onCommentInput"
+      confirm-type="send"
+      bindconfirm="submitComment"
+    />
+    <button class="btn btn-primary btn-sm send-btn" bindtap="submitComment" loading="{{sending}}" disabled="{{sending}}">发送</button>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty">
+    <view class="empty-title">{{loading ? '正在加载动态...' : '动态不存在'}}</view>
+  </view>
+</view>

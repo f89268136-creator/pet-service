@@ -1,0 +1,58 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    druid:
+      driver-class-name: ${pet.datasource.driver-class-name}
+      url: jdbc:mysql://${pet.datasource.host}:${pet.datasource.port}/${pet.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${pet.datasource.username}
+      password: ${pet.datasource.password}
+  redis:
+    host: ${pet.redis.host}
+    port: ${pet.redis.port}
+    password: ${pet.redis.password}
+    database: ${pet.redis.database}
+
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.pet.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com:
+      pet:
+        mapper: debug
+        service: info
+        controller: info
+
+pet:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: ${PET_ADMIN_JWT_SECRET:change-me-admin-jwt-secret}
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    user-secret-key: ${PET_USER_JWT_SECRET:change-me-user-jwt-secret}
+    user-ttl: 7200000
+    user-token-name: authentication
+  alioss:
+    endpoint: ${pet.alioss.endpoint}
+    access-key-id: ${pet.alioss.access-key-id}
+    access-key-secret: ${pet.alioss.access-key-secret}
+    bucket-name: ${pet.alioss.bucket-name}
+  wechat:
+    appid: ${pet.wechat.appid}
+    secret: ${pet.wechat.secret}
