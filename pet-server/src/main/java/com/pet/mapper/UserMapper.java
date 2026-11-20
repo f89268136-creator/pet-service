@@ -34,6 +34,9 @@ public interface UserMapper {
     @Select("select * from user where phone = #{phone}")
     User getByPhone(String phone);
 
+    @Select("select * from user where email = #{email}")
+    User getByEmail(String email);
+
     /**
      * 根据动态条件统计用户数量
      * @param map

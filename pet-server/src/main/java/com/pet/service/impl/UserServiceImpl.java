@@ -3,16 +3,18 @@ package com.pet.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.pet.constant.MessageConstant;
+import com.pet.dto.EmailLoginDTO;
 import com.pet.dto.UserLoginDTO;
 import com.pet.entity.User;
 import com.pet.exception.LoginFailedException;
 import com.pet.mapper.UserMapper;
 import com.pet.properties.WeChatProperties;
+import com.pet.service.LoginCodeService;
 import com.pet.service.UserService;
 import com.pet.utils.HttpClientUtil;
+import com.pet.vo.SendCodeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,7 +24,7 @@ import java.util.Map;
 /**
  * 用户业务实现。
  *
- * <p>支持微信小程序登录（code 换 openid）以及演示环境手机号登录，
+ * <p>支持微信小程序登录（code 换 openid）以及邮箱验证码登录，
  * 首次登录会自动创建用户。</p>
  */
 @Service
@@ -36,9 +38,8 @@ public class UserServiceImpl implements UserService {
     private WeChatProperties weChatProperties;
     @Autowired
     private UserMapper userMapper;
-
-    @Value("${pet.demo-login-enabled:false}")
-    private boolean demoLoginEnabled;
+    @Autowired
+    private LoginCodeService loginCodeService;
 
     /**
      * 微信登录
@@ -70,25 +71,29 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 演示环境手机号登录，避免依赖微信授权
-     * @param phone
-     * @return
+     * 发送邮箱登录验证码，发送频率与封禁状态由风控组件控制。
      */
-    public User devLogin(String phone) {
-        if (!demoLoginEnabled || phone == null || phone.trim().isEmpty()) {
-            throw new LoginFailedException(MessageConstant.DEV_LOGIN_DISABLED);
+    @Override
+    public SendCodeVO sendLoginCode(String email) {
+        return loginCodeService.send(email);
+    }
+
+    /**
+     * 邮箱验证码登录，校验通过后按邮箱查询或自动注册用户。
+     */
+    @Override
+    public User loginByCode(EmailLoginDTO emailLoginDTO) {
+        String email = loginCodeService.verify(emailLoginDTO.getEmail(), emailLoginDTO.getCode());
+        User user = userMapper.getByEmail(email);
+        if (user != null) {
+            return user;
         }
-        String normalizedPhone = phone.trim();
-        User user = userMapper.getByPhone(normalizedPhone);
-        if (user == null) {
-            user = User.builder()
-                    .openid("dev-" + normalizedPhone)
-                    .name("演示用户")
-                    .phone(normalizedPhone)
-                    .createTime(LocalDateTime.now())
-                    .build();
-            userMapper.insert(user);
-        }
+        user = User.builder()
+                .email(email)
+                .name("宠物用户")
+                .createTime(LocalDateTime.now())
+                .build();
+        userMapper.insert(user);
         return user;
     }
 

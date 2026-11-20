@@ -18,6 +18,8 @@ public class UserLoginVO implements Serializable {
 
     private Long id;
     private String openid;
+    private String phone;
+    private String email;
     private String token;
 
 }

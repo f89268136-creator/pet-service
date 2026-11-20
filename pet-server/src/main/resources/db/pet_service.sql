@@ -106,6 +106,7 @@ CREATE TABLE user (
     openid      VARCHAR(64)  DEFAULT NULL COMMENT '微信openid',
     name        VARCHAR(32)  DEFAULT NULL COMMENT '姓名',
     phone       VARCHAR(11)  DEFAULT NULL COMMENT '手机号',
+    email       VARCHAR(128) DEFAULT NULL COMMENT '邮箱（验证码登录账号）',
     sex         VARCHAR(2)   DEFAULT NULL COMMENT '性别',
     id_number   VARCHAR(18)  DEFAULT NULL COMMENT '身份证号',
     avatar      VARCHAR(500) DEFAULT NULL COMMENT '头像',
@@ -113,6 +114,7 @@ CREATE TABLE user (
     create_time DATETIME     NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY idx_user_openid (openid),
+    UNIQUE KEY idx_user_email (email),
     KEY idx_user_phone (phone)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '用户';
 

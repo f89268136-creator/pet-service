@@ -9,33 +9,54 @@
     <view class="card-title">欢迎回来</view>
     <view class="card-sub">登录后可预约服务、管理宠物档案、参与社区互动</view>
 
-    <button class="btn btn-primary btn-block login-btn" bindtap="wxLogin" loading="{{wxLoading}}" disabled="{{devLoading}}">
+    <button class="btn btn-primary btn-block login-btn" bindtap="wxLogin" loading="{{wxLoading}}" disabled="{{logging}}">
       微信一键登录
     </button>
 
     <view class="or">
       <view class="line"></view>
-      <text class="or-text">或使用演示手机号</text>
+      <text class="or-text">或使用邮箱验证码</text>
       <view class="line"></view>
     </view>
 
-    <view class="phone-box">
+    <view class="field">
       <input
-        class="phone-input"
-        type="number"
-        maxlength="11"
-        placeholder="请输入11位手机号"
+        class="field-input"
+        type="text"
+        maxlength="64"
+        placeholder="请输入邮箱"
         placeholder-class="form-placeholder"
-        value="{{phone}}"
-        bindinput="onPhoneInput"
+        value="{{email}}"
+        bindinput="onEmailInput"
       />
-      <button class="btn btn-light btn-sm phone-btn" bindtap="devLogin" loading="{{devLoading}}" disabled="{{wxLoading}}">
-        登录
+    </view>
+
+    <view class="code-row">
+      <input
+        class="field-input code-input"
+        type="number"
+        maxlength="6"
+        placeholder="6位验证码"
+        placeholder-class="form-placeholder"
+        value="{{code}}"
+        bindinput="onCodeInput"
+      />
+      <button
+        class="btn btn-light btn-sm code-btn"
+        bindtap="sendCode"
+        loading="{{sending}}"
+        disabled="{{sending || countdown > 0}}"
+      >
+        {{countdown > 0 ? countdown + 's 后重发' : '发送验证码'}}
       </button>
     </view>
 
+    <button class="btn btn-primary btn-block login-btn" bindtap="emailLogin" loading="{{logging}}" disabled="{{wxLoading}}">
+      登录
+    </button>
+
     <view class="hint">
-      微信登录需要小程序 appid 与后端 pet.wechat 配置一致；本地联调推荐使用演示手机号登录。
+      验证码 5 分钟内有效，1 分钟内只能发送一次；连续发送或输错次数过多会触发临时限制。微信登录需要小程序 appid 与后端 pet.wechat 配置一致。
     </view>
   </view>
 </view>

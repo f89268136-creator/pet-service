@@ -15,8 +15,8 @@
 | 层次 | 技术 |
 | --- | --- |
 | 后端 | Spring Boot 2.7.18、MyBatis、PageHelper、Druid、JWT（jjwt）、Knife4j |
-| 存储 | MySQL 8.0、Redis（缓存 / 分布式锁 / Lua / Stream / ZSet / GEO / Bitmap） |
-| 中间件 | Redisson 3.23.5、阿里云 OSS SDK |
+| 存储 | MySQL 8.0、Redis（缓存 / 分布式锁 / Lua / ZSet / GEO / Bitmap） |
+| 中间件 | RabbitMQ 3.x（秒杀异步落单）、Redisson 3.23.5、阿里云 OSS SDK、Spring Mail（QQ SMTP） |
 | 管理端 | Vue 2 + Element UI + Vue CLI 3（webpack 4） |
 | 用户端 | 原生微信小程序 |
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | `pet-common` | 通用工具、常量、业务异常、统一返回结果、JWT 工具 |
 | `pet-pojo` | 实体、DTO、VO |
-| `pet-server` | Web 层、Service、Mapper、拦截器、定时任务、Stream 消费者 |
+| `pet-server` | Web 层、Service、Mapper、拦截器、定时任务、RabbitMQ 消费者 |
 | `pet-admin` | Vue 2 商家管理后台 |
 | `pet-weixin` | 微信小程序用户端（15 个页面） |
 
@@ -42,8 +42,8 @@
 
 ### 2. 服务套餐秒杀
 
-- 活动库存预热到 Redis，抢购通过 Lua 脚本在一个原子操作内完成判重、扣减、记录
-- 抢购成功不直接落库，写入 Redis Stream 排队，消费者异步幂等入库，接口立即返回「排队中」
+- 活动库存预热到 Redis，抢购入口先经 Redis 令牌桶限流，再用 Lua 脚本在一个原子操作内完成判重、扣减、记录
+- 抢购成功不直接落库，投递 RabbitMQ 排队，消费者异步幂等入库，接口立即返回「排队中」
 - 数据库以 `(activity_id, user_id)` 唯一索引 + `stock > 0` 条件扣减兜底
 - 后台支持活动创建、启停、订单查询与核销
 
@@ -66,6 +66,13 @@
 ### 6. 商家管理后台
 
 预约管理（查询/确认/核销/完成/取消）、时段管理、秒杀活动与订单、社区内容审核、门店与坐标维护、服务项目、服务套餐、分类、员工、营业数据统计。
+
+### 7. 邮箱验证码登录与风控
+
+- 验证码通过 QQ 邮箱 SMTP 发送并写入 Redis，默认 5 分钟有效；未开启邮件发送时只写日志，开发环境可直接把验证码返回给前端联调
+- 发送频率用 Redis ZSET 做时间窗口统计：1 分钟内只允许一次，5 分钟内达到上限触发封禁
+- 登录失败同样按 5 分钟窗口计数，达到 3 次触发封禁：首次封禁 10 分钟，24 小时内再次触发升级为 30 分钟
+- JWT 同时写入 Redis，拦截器校验令牌存在性；剩余有效期低于 30 分钟时自动续期，并通过响应头 `authentication` 下发新令牌
 
 ## 功能实现
 
@@ -95,7 +102,9 @@ SISMEMBER 已购集合判重 → GET 库存 → 库存 <= 0 返回售罄
 
 返回值语义：`>=0` 剩余库存、`-1` 售罄、`-2` 重复购买、`-3` 库存未初始化。
 
-抢购成功后 `XADD` 到 `pet:stream:seckill-order`，`SeckillOrderStreamConsumer` 定时消费，在事务中幂等落库并扣减数据库库存；落库失败回补 Redis 库存与购买标记，Stream 写入失败则同步补偿。
+抢购入口先经过令牌桶限流（`pet:seckill:bucket:global`，容量与速率可配置），再执行 Lua 脚本。
+
+抢购成功后投递到 RabbitMQ（`pet.seckill.exchange` / `pet.seckill.order.queue`），`SeckillOrderConsumer` 消费消息，在事务中幂等落库并扣减数据库库存；落库失败回补 Redis 库存与购买标记，投递失败则同步补偿。
 
 ### 缓存治理
 
@@ -134,7 +143,11 @@ SISMEMBER 已购集合判重 → GET 库存 → 库存 <= 0 返回售罄
 | `pet:lock:appointment:pet:{petId}` | String | 预约提交分布式锁 |
 | `pet:seckill:stock:{activityId}` | String | 秒杀库存 |
 | `pet:seckill:users:{activityId}` | Set | 已购用户集合 |
-| `pet:stream:seckill-order` | Stream | 秒杀订单异步队列 |
+| `pet:seckill:bucket:global` | Hash | 秒杀令牌桶 |
+| `pet:login:code:{email}` | String | 登录验证码 |
+| `pet:login:send:{email}` / `pet:login:fail:{email}` | ZSet | 验证码发送 / 登录失败时间窗口 |
+| `pet:login:ban:{email}` / `pet:login:banlevel:{email}` | String | 登录封禁状态与升级标记 |
+| `pet:login:token:{userId}` | String | 用户端 JWT 令牌 |
 | `pet:community:feed:time` | ZSet | 社区时间流 |
 | `pet:community:feed:hot` | ZSet | 社区热度流 |
 | `pet:store:geo` | GEO | 门店坐标索引 |
@@ -147,7 +160,8 @@ SISMEMBER 已购集合判重 → GET 库存 → 库存 <= 0 返回售罄
 - JDK 8+（源码编译级别 1.8）
 - Maven 3.9+
 - MySQL 8.0+
-- Redis 6.0+（秒杀用到 Lua 与 Stream）
+- Redis 6.0+（秒杀、限流、登录风控依赖 Lua 与 ZSet）
+- RabbitMQ 3.x（秒杀订单异步落单）
 - Node.js 16（运行管理端）
 
 ### 2. 初始化数据库
@@ -159,6 +173,12 @@ mysql -uroot -p --default-character-set=utf8mb4 < pet-server/src/main/resources/
 Windows 下 mysql 客户端默认字符集常为 GBK，缺少 `--default-character-set=utf8mb4` 会导致中文乱码或 `Data too long`。
 
 脚本会执行 `DROP DATABASE IF EXISTS pet_service`，请先确认本地没有需要保留的同名库。导入后自带门店、宠物、服务项目、未来两天可约时段、秒杀活动、社区动态等演示数据。
+
+已有旧库（没有 `user.email` 字段）需要执行一次升级脚本：
+
+```bash
+mysql -uroot -p --default-character-set=utf8mb4 < pet-server/src/main/resources/db/upgrade_v2_email_login.sql
+```
 
 ### 3. 配置
 
@@ -172,8 +192,14 @@ Windows 下 mysql 客户端默认字符集常为 GBK，缺少 `--default-charact
 | `PET_ADMIN_JWT_SECRET` / `PET_USER_JWT_SECRET` | JWT 签名密钥 | `change-me-*` |
 | `ALIOSS_ACCESS_KEY_ID` / `ALIOSS_ACCESS_KEY_SECRET` | 阿里云 OSS 密钥 | 占位值 |
 | `WECHAT_APPID` / `WECHAT_SECRET` | 小程序 AppID 与密钥 | 占位值 |
+| `RABBITMQ_HOST` / `RABBITMQ_PORT` | RabbitMQ 地址 | `localhost` / `5672` |
+| `RABBITMQ_USERNAME` / `RABBITMQ_PASSWORD` | RabbitMQ 账号 | `guest` / `guest` |
+| `MAIL_HOST` / `MAIL_PORT` | SMTP 服务地址 | `smtp.qq.com` / `587` |
+| `MAIL_USERNAME` / `MAIL_PASSWORD` | 发件邮箱与 SMTP 授权码 | 空 |
+| `PET_MAIL_ENABLED` | 是否真实发送验证码邮件 | `false` |
+| `PET_DEV_RETURN_CODE` | 未开启邮件时是否把验证码返回前端 | `true` |
 
-演示环境需保持 `pet.demo-login-enabled: true`（默认开启），用于免微信授权的手机号登录。正式部署前务必替换所有 `change-me` 密钥与占位凭据。
+未开启邮件发送时验证码只写日志，开发环境可以直接从接口响应拿到验证码完成登录；上线前把 `PET_MAIL_ENABLED` 设为 `true`、关闭 `PET_DEV_RETURN_CODE`，并替换所有 `change-me` 密钥与占位凭据。
 
 ### 4. 启动后端
 
@@ -203,20 +229,24 @@ npm run serve
 
 用微信开发者工具导入 `pet-weixin` 目录即可，`project.config.json` 中的 AppID 为占位值（`touristappid`），可先用测试号运行。开发时需勾选「不校验合法域名」，或在小程序后台把后端地址加入白名单。
 
-### 7. 演示登录
+### 7. 邮箱验证码登录
 
-用户端依赖微信授权，开发环境走演示登录接口：
+开发环境未开启邮件发送时，发送接口会直接返回 `devCode`，可用于本地联调：
 
 ```bash
-curl -X POST http://localhost:8080/user/user/dev-login \
+curl -X POST http://localhost:8080/user/user/code \
   -H "Content-Type: application/json" \
-  -d '{"phone":"13800000000"}'
+  -d '{"email":"demo@example.com"}'
+
+curl -X POST http://localhost:8080/user/user/email-login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@example.com","code":"123456"}'
 ```
 
-返回的 `data.token` 作为用户端后续请求头 `authentication` 的值；管理端登录后返回的 token 放在请求头 `token` 中。
+返回的 `data.token` 作为用户端后续请求头 `authentication` 的值；令牌临近过期时响应头 `authentication` 会带回新令牌。管理端登录后返回的 token 放在请求头 `token` 中，退出登录调用 `POST /user/user/logout`。
 
 ## 说明
 
 - 支付为模拟接口，未接入真实支付渠道。上线需替换预约与秒杀订单的支付逻辑，并补充回调幂等与对账。
-- 秒杀、社区、签到、附近门店强依赖 Redis，Redis 不可用时这些接口报错；预约闭环与后台基础管理仍可正常运行。
-- 秒杀订单为异步落库，抢购成功后需短暂等待再查询订单列表。
+- 秒杀、社区、签到、附近门店、登录验证码与令牌校验强依赖 Redis，Redis 不可用时相关接口报错；预约闭环与后台基础管理仍可正常运行。
+- 秒杀订单通过 RabbitMQ 异步落库，抢购成功后需短暂等待再查询订单列表；RabbitMQ 未启动时抢购接口返回「秒杀请求处理失败」。

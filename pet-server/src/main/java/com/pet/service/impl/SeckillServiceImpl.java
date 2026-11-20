@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pet.constant.MessageConstant;
 import com.pet.dto.SeckillActivityDTO;
+import com.pet.dto.SeckillOrderMessage;
 import com.pet.entity.SeckillActivity;
 import com.pet.entity.SeckillOrder;
 import com.pet.entity.ServicePackage;
@@ -13,12 +14,14 @@ import com.pet.mapper.SeckillOrderMapper;
 import com.pet.mapper.ServicePackageMapper;
 import com.pet.result.PageResult;
 import com.pet.service.SeckillService;
+import com.pet.service.TokenBucketLimiter;
 import com.pet.vo.SeckillActivityVO;
 import com.pet.vo.SeckillGrabVO;
 import com.pet.vo.SeckillOrderVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.stream.StreamRecords;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -27,24 +30,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 服务套餐秒杀业务实现。
  *
- * <p>采用 Redis + Lua 原子预扣库存并记录已抢用户，抢购成功后通过 Redis Stream
- * 异步落库；数据库库存与订单由消费者最终写入，失败时回滚 Redis 预扣。</p>
+ * <p>抢购入口先用 Redis 令牌桶限流；通过 Lua 原子完成“查重 + 扣库存 + 记录用户”后，
+ * 将落库消息投递到 RabbitMQ 异步处理，数据库库存与订单由消费者最终写入，
+ * 投递或落库失败时回滚 Redis 预扣。</p>
  */
 @Service
 @Slf4j
 public class SeckillServiceImpl implements SeckillService {
 
-    public static final String STREAM_KEY = "pet:stream:seckill-order";
+    private static final String BUCKET_KEY = "pet:seckill:bucket:global";
     private static final String STOCK_KEY_PREFIX = "pet:seckill:stock:";
     private static final String USERS_KEY_PREFIX = "pet:seckill:users:";
     private static final DateTimeFormatter ORDER_TIME = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -70,6 +73,19 @@ public class SeckillServiceImpl implements SeckillService {
     private ServicePackageMapper setmealMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private TokenBucketLimiter tokenBucketLimiter;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Value("${pet.seckill.rabbit.exchange}")
+    private String exchangeName;
+    @Value("${pet.seckill.rabbit.routing-key}")
+    private String routingKey;
+    @Value("${pet.seckill.rate-limit.capacity:100}")
+    private int bucketCapacity;
+    @Value("${pet.seckill.rate-limit.permits-per-second:50}")
+    private int bucketPermitsPerSecond;
 
     /**
      * 查询进行中的秒杀活动，并用 Redis 库存覆盖数据库库存展示。
@@ -97,11 +113,15 @@ public class SeckillServiceImpl implements SeckillService {
     }
 
     /**
-     * 抢购秒杀套餐：校验活动状态与时间后，通过 Lua 脚本原子完成“查重 + 扣库存 + 记录用户”，
-     * 成功则投递 Redis Stream 异步落库，投递失败时回滚预扣。
+     * 抢购秒杀套餐：先经令牌桶限流，再校验活动状态与时间，
+     * 通过 Lua 脚本原子完成“查重 + 扣库存 + 记录用户”，
+     * 成功则投递 RabbitMQ 异步落库，投递失败时回滚预扣。
      */
     @Override
     public SeckillGrabVO grab(Long activityId, Long userId) {
+        if (!tokenBucketLimiter.tryAcquire(BUCKET_KEY, bucketCapacity, bucketPermitsPerSecond)) {
+            throw new BusinessException(MessageConstant.SECKILL_RATE_LIMITED);
+        }
         SeckillActivity activity = activityMapper.getById(activityId);
         if (activity == null) {
             throw new BusinessException(MessageConstant.SECKILL_NOT_FOUND);
@@ -146,16 +166,15 @@ public class SeckillServiceImpl implements SeckillService {
 
         String orderNo = "SK" + now.format(ORDER_TIME)
                 + String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
+        SeckillOrderMessage message = SeckillOrderMessage.builder()
+                .orderNo(orderNo)
+                .activityId(activityId)
+                .userId(userId)
+                .amount(activity.getSeckillPrice())
+                .createTime(now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                .build();
         try {
-            Map<String, String> message = new HashMap<>();
-            message.put("orderNo", orderNo);
-            message.put("activityId", String.valueOf(activityId));
-            message.put("userId", String.valueOf(userId));
-            message.put("amount", activity.getSeckillPrice().toPlainString());
-            message.put("createTime", now.toString());
-            stringRedisTemplate.opsForStream().add(
-                    StreamRecords.newRecord().in(STREAM_KEY).ofMap(message));
-            stringRedisTemplate.opsForStream().trim(STREAM_KEY, 1000);
+            rabbitTemplate.convertAndSend(exchangeName, routingKey, message);
         } catch (Exception e) {
             log.error("秒杀消息投递失败，回滚 Redis 预扣库存，orderNo={}", orderNo, e);
             restoreReservation(activityId, userId);
@@ -289,12 +308,12 @@ public class SeckillServiceImpl implements SeckillService {
     }
 
     /**
-     * 消费 Stream 消息后落库：扣减数据库库存并写入秒杀订单，订单号已存在时直接幂等返回。
+     * 消费 MQ 消息后落库：扣减数据库库存并写入秒杀订单，订单号已存在时直接幂等返回。
      */
     @Override
     @Transactional
-    public void persistFromStream(String orderNo, Long activityId, Long userId,
-                                  BigDecimal amount, LocalDateTime createTime) {
+    public void persistOrder(String orderNo, Long activityId, Long userId,
+                             BigDecimal amount, LocalDateTime createTime) {
         if (orderMapper.getByOrderNo(orderNo) != null) {
             return;
         }

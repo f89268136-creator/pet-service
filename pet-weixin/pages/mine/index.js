@@ -5,7 +5,7 @@ Page({
   data: {
     user: null,
     displayName: '宠物家长',
-    phoneText: '演示账号',
+    accountText: '',
     stats: null,
     statsLoading: true,
     signing: false,
@@ -25,8 +25,10 @@ Page({
     const user = auth.getUser() || {};
     this.setData({
       user: user,
-      displayName: user.phone ? '宠物家长' : '演示用户',
-      phoneText: user.phone ? this.maskPhone(user.phone) : '演示账号'
+      displayName: user.email ? user.email.split('@')[0] : '宠物家长',
+      accountText: user.email
+        ? user.email
+        : (user.phone ? this.maskPhone(user.phone) : '已绑定微信')
     });
     this.loadStats();
   },
@@ -102,8 +104,10 @@ Page({
         if (!res.confirm) {
           return;
         }
-        auth.logout();
-        wx.reLaunch({ url: '/pages/login/index' });
+        api.user.logout().catch(function () {}).then(function () {
+          auth.logout();
+          wx.reLaunch({ url: '/pages/login/index' });
+        });
       }
     });
   }

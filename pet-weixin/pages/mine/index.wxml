@@ -4,7 +4,7 @@
       <view class="avatar">我</view>
       <view class="profile-info">
         <view class="profile-name">{{displayName}}</view>
-        <view class="profile-phone">{{phoneText}}</view>
+        <view class="profile-phone">{{accountText}}</view>
         <view class="profile-id" wx:if="{{user && user.id}}">用户编号 {{user.id}}</view>
       </view>
     </view>

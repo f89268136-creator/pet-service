@@ -74,9 +74,9 @@ public interface SeckillService {
     void verify(String verifyCode);
 
     /**
-     * 将 Stream 中的秒杀消息异步落库。
+     * 将 MQ 中的秒杀消息异步落库。
      */
-    void persistFromStream(String orderNo, Long activityId, Long userId, BigDecimal amount, LocalDateTime createTime);
+    void persistOrder(String orderNo, Long activityId, Long userId, BigDecimal amount, LocalDateTime createTime);
 
     /**
      * 回滚 Redis 中的秒杀预扣库存与用户标记。

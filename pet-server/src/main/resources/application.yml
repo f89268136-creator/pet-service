@@ -20,6 +20,23 @@ spring:
     port: ${pet.redis.port}
     password: ${pet.redis.password}
     database: ${pet.redis.database}
+  mail:
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 mybatis:
   #mapper配置文件
@@ -47,7 +64,28 @@ pet:
     admin-token-name: token
     user-secret-key: ${PET_USER_JWT_SECRET:change-me-user-jwt-secret}
     user-ttl: 7200000
+    # 剩余有效期低于该值时自动续期
+    refresh-threshold-ms: 1800000
     user-token-name: authentication
+  login:
+    # 验证码有效期（秒）
+    code-ttl-seconds: 300
+    # 是否真实发送邮件，未开启时验证码只写日志
+    mail-enabled: ${PET_MAIL_ENABLED:false}
+    # 开发环境是否把验证码返回给前端便于联调
+    dev-return-code: ${PET_DEV_RETURN_CODE:true}
+    # 发件人，默认与邮箱账号一致
+    from: ${MAIL_USERNAME:}
+  seckill:
+    rabbit:
+      exchange: pet.seckill.exchange
+      queue: pet.seckill.order.queue
+      routing-key: pet.seckill.order
+    rate-limit:
+      # 令牌桶容量
+      capacity: 100
+      # 每秒补充的令牌数
+      permits-per-second: 50
   alioss:
     endpoint: ${pet.alioss.endpoint}
     access-key-id: ${pet.alioss.access-key-id}

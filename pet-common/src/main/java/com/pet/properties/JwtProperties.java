@@ -24,6 +24,10 @@ public class JwtProperties {
      */
     private String userSecretKey;
     private long userTtl;
+    /**
+     * 令牌剩余有效期低于该值时自动续期
+     */
+    private long refreshThresholdMs;
     private String userTokenName;
 
 }

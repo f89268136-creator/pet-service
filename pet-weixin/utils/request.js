@@ -65,6 +65,11 @@ function request(options) {
           return;
         }
         const body = res.data || {};
+        // 后端在令牌临近过期时会通过响应头下发新令牌
+        const refreshed = res.header && (res.header.authentication || res.header.Authentication);
+        if (refreshed) {
+          wx.setStorageSync('token', refreshed);
+        }
         if (body.code === 1) {
           resolve(body.data);
           return;

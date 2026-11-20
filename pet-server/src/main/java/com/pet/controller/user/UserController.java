@@ -1,13 +1,14 @@
 package com.pet.controller.user;
 
-import com.pet.constant.JwtClaimsConstant;
-import com.pet.dto.DevLoginDTO;
+import com.pet.context.BaseContext;
+import com.pet.dto.EmailLoginDTO;
+import com.pet.dto.SendCodeDTO;
 import com.pet.dto.UserLoginDTO;
 import com.pet.entity.User;
-import com.pet.properties.JwtProperties;
 import com.pet.result.Result;
 import com.pet.service.UserService;
-import com.pet.utils.JwtUtil;
+import com.pet.service.UserTokenService;
+import com.pet.vo.SendCodeVO;
 import com.pet.vo.UserLoginVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 用户端登录接口。
@@ -32,7 +31,7 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private JwtProperties jwtProperties;
+    private UserTokenService userTokenService;
 
     /**
      * 微信登录
@@ -50,26 +49,47 @@ public class UserController {
     }
 
     /**
-     * 演示环境手机号登录
-     * @param devLoginDTO
+     * 发送邮箱登录验证码
+     * @param sendCodeDTO
      * @return
      */
-    @PostMapping("/dev-login")
-    @ApiOperation("演示登录")
-    public Result<UserLoginVO> devLogin(@RequestBody DevLoginDTO devLoginDTO){
-        log.info("演示用户登录：{}", devLoginDTO.getPhone());
-        User user = userService.devLogin(devLoginDTO.getPhone());
+    @PostMapping("/code")
+    @ApiOperation("发送邮箱验证码")
+    public Result<SendCodeVO> sendCode(@RequestBody SendCodeDTO sendCodeDTO) {
+        log.info("发送登录验证码：{}", sendCodeDTO.getEmail());
+        return Result.success(userService.sendLoginCode(sendCodeDTO.getEmail()));
+    }
+
+    /**
+     * 邮箱验证码登录
+     * @param emailLoginDTO
+     * @return
+     */
+    @PostMapping("/email-login")
+    @ApiOperation("邮箱验证码登录")
+    public Result<UserLoginVO> emailLogin(@RequestBody EmailLoginDTO emailLoginDTO) {
+        log.info("邮箱验证码登录：{}", emailLoginDTO.getEmail());
+        User user = userService.loginByCode(emailLoginDTO);
         return Result.success(buildLoginVO(user));
     }
 
+    /**
+     * 退出登录，令牌从 Redis 中删除后立即失效。
+     */
+    @PostMapping("/logout")
+    @ApiOperation("退出登录")
+    public Result logout() {
+        userTokenService.remove(BaseContext.getCurrentId());
+        return Result.success();
+    }
+
     private UserLoginVO buildLoginVO(User user) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(JwtClaimsConstant.USER_ID, user.getId());
-        String token = JwtUtil.createJWT(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);
         return UserLoginVO.builder()
                 .id(user.getId())
                 .openid(user.getOpenid())
-                .token(token)
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .token(userTokenService.issue(user.getId()))
                 .build();
     }
 }

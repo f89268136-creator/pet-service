@@ -1,26 +1,95 @@
 const api = require('../../api/index');
 const auth = require('../../utils/auth');
 
+const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
 Page({
   data: {
-    phone: '',
+    email: '',
+    code: '',
     wxLoading: false,
-    devLoading: false
+    logging: false,
+    sending: false,
+    countdown: 0
   },
 
   onLoad: function () {
     const user = auth.getUser();
-    if (user && user.phone) {
-      this.setData({ phone: user.phone });
-    }
+    const cachedEmail = wx.getStorageSync('loginEmail');
+    this.setData({ email: (user && user.email) || cachedEmail || '' });
   },
 
-  onPhoneInput: function (event) {
-    this.setData({ phone: event.detail.value });
+  onUnload: function () {
+    this.clearCountdown();
+  },
+
+  onEmailInput: function (event) {
+    this.setData({ email: event.detail.value });
+  },
+
+  onCodeInput: function (event) {
+    this.setData({ code: event.detail.value });
+  },
+
+  sendCode: function () {
+    if (this.data.sending || this.data.countdown > 0) {
+      return;
+    }
+    const email = (this.data.email || '').trim();
+    if (!EMAIL_PATTERN.test(email)) {
+      wx.showToast({ title: '请输入正确的邮箱', icon: 'none' });
+      return;
+    }
+    const that = this;
+    this.setData({ sending: true });
+    api.user.sendCode(email)
+      .then(function (result) {
+        that.startCountdown(60);
+        if (result && result.devCode) {
+          that.setData({ code: result.devCode });
+          wx.showModal({
+            title: '验证码已发送',
+            content: '开发环境未开启邮件发送，验证码已自动填入：' + result.devCode,
+            showCancel: false
+          });
+        } else {
+          wx.showToast({ title: '验证码已发送至邮箱', icon: 'none' });
+        }
+      })
+      .catch(function () {})
+      .then(function () {
+        that.setData({ sending: false });
+      });
+  },
+
+  emailLogin: function () {
+    if (this.data.logging || this.data.wxLoading) {
+      return;
+    }
+    const email = (this.data.email || '').trim();
+    const code = (this.data.code || '').trim();
+    if (!EMAIL_PATTERN.test(email)) {
+      wx.showToast({ title: '请输入正确的邮箱', icon: 'none' });
+      return;
+    }
+    if (!/^\d{6}$/.test(code)) {
+      wx.showToast({ title: '请输入6位验证码', icon: 'none' });
+      return;
+    }
+    const that = this;
+    this.setData({ logging: true });
+    api.user.emailLogin(email, code)
+      .then(function (data) {
+        that.finishLogin(data, email);
+      })
+      .catch(function () {})
+      .then(function () {
+        that.setData({ logging: false });
+      });
   },
 
   wxLogin: function () {
-    if (this.data.wxLoading || this.data.devLoading) {
+    if (this.data.wxLoading || this.data.logging) {
       return;
     }
     const that = this;
@@ -39,7 +108,7 @@ Page({
           .catch(function () {
             wx.showModal({
               title: '微信登录失败',
-              content: '请确认小程序 appid 与后端配置一致；本地联调可改用下方的演示手机号登录。',
+              content: '请确认小程序 appid 与后端配置一致；本地联调可改用邮箱验证码登录。',
               showCancel: false
             });
           })
@@ -54,29 +123,30 @@ Page({
     });
   },
 
-  devLogin: function () {
-    if (this.data.wxLoading || this.data.devLoading) {
-      return;
-    }
-    const phone = (this.data.phone || '').trim();
-    if (!/^1\d{10}$/.test(phone)) {
-      wx.showToast({ title: '请输入11位手机号', icon: 'none' });
-      return;
-    }
+  startCountdown: function (seconds) {
     const that = this;
-    this.setData({ devLoading: true });
-    api.user.devLogin(phone)
-      .then(function (data) {
-        that.finishLogin(data, phone);
-      })
-      .catch(function () {})
-      .then(function () {
-        that.setData({ devLoading: false });
-      });
+    this.clearCountdown();
+    this.setData({ countdown: seconds });
+    this.countdownTimer = setInterval(function () {
+      const next = that.data.countdown - 1;
+      if (next <= 0) {
+        that.clearCountdown();
+        that.setData({ countdown: 0 });
+      } else {
+        that.setData({ countdown: next });
+      }
+    }, 1000);
   },
 
-  finishLogin: function (loginVO, phone) {
-    auth.saveLogin(loginVO, phone);
+  clearCountdown: function () {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+  },
+
+  finishLogin: function (loginVO, email) {
+    auth.saveLogin(loginVO, email);
     wx.showToast({ title: '登录成功', icon: 'success' });
     setTimeout(function () {
       const pages = getCurrentPages();
