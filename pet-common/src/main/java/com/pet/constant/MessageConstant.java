@@ -39,14 +39,6 @@ public class MessageConstant {
     public static final String APPOINTMENT_STATUS_ERROR = "当前预约状态不支持该操作";
     public static final String VERIFY_CODE_ERROR = "核销码错误";
 
-    public static final String EMAIL_REQUIRED = "请输入邮箱";
-    public static final String EMAIL_FORMAT_ERROR = "邮箱格式不正确";
-    public static final String CODE_REQUIRED = "请输入验证码";
-    public static final String CODE_ERROR = "验证码错误";
-    public static final String CODE_EXPIRED = "验证码已过期，请重新获取";
-    public static final String CODE_SEND_FAILED = "验证码发送失败，请稍后重试";
-    public static final String CODE_SEND_TOO_FREQUENT = "验证码发送过于频繁，请稍后再试";
-    public static final String LOGIN_BANNED = "登录尝试次数过多，请%d分钟后再试";
     public static final String LOGIN_REQUIRED = "请先登录";
     public static final String SECKILL_RATE_LIMITED = "当前抢购人数过多，请稍后再试";
 

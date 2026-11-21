@@ -17,16 +17,6 @@ module.exports = {
     wxLogin: function (code) {
       return request({ url: '/user/user/login', method: 'POST', data: { code: code } });
     },
-    sendCode: function (email) {
-      return request({ url: '/user/user/code', method: 'POST', data: { email: email } });
-    },
-    emailLogin: function (email, code) {
-      return request({
-        url: '/user/user/email-login',
-        method: 'POST',
-        data: { email: email, code: code }
-      });
-    },
     logout: function () {
       return request({ url: '/user/user/logout', method: 'POST', silent: true });
     }

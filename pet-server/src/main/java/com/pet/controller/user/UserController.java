@@ -1,14 +1,11 @@
 package com.pet.controller.user;
 
 import com.pet.context.BaseContext;
-import com.pet.dto.EmailLoginDTO;
-import com.pet.dto.SendCodeDTO;
 import com.pet.dto.UserLoginDTO;
 import com.pet.entity.User;
 import com.pet.result.Result;
 import com.pet.service.UserService;
 import com.pet.service.UserTokenService;
-import com.pet.vo.SendCodeVO;
 import com.pet.vo.UserLoginVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,31 +42,6 @@ public class UserController {
 
         //微信登录
         User user = userService.wxLogin(userLoginDTO);
-        return Result.success(buildLoginVO(user));
-    }
-
-    /**
-     * 发送邮箱登录验证码
-     * @param sendCodeDTO
-     * @return
-     */
-    @PostMapping("/code")
-    @ApiOperation("发送邮箱验证码")
-    public Result<SendCodeVO> sendCode(@RequestBody SendCodeDTO sendCodeDTO) {
-        log.info("发送登录验证码：{}", sendCodeDTO.getEmail());
-        return Result.success(userService.sendLoginCode(sendCodeDTO.getEmail()));
-    }
-
-    /**
-     * 邮箱验证码登录
-     * @param emailLoginDTO
-     * @return
-     */
-    @PostMapping("/email-login")
-    @ApiOperation("邮箱验证码登录")
-    public Result<UserLoginVO> emailLogin(@RequestBody EmailLoginDTO emailLoginDTO) {
-        log.info("邮箱验证码登录：{}", emailLoginDTO.getEmail());
-        User user = userService.loginByCode(emailLoginDTO);
         return Result.success(buildLoginVO(user));
     }
 

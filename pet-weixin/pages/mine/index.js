@@ -25,10 +25,8 @@ Page({
     const user = auth.getUser() || {};
     this.setData({
       user: user,
-      displayName: user.email ? user.email.split('@')[0] : '宠物家长',
-      accountText: user.email
-        ? user.email
-        : (user.phone ? this.maskPhone(user.phone) : '已绑定微信')
+      displayName: user.name ? user.name : '宠物家长',
+      accountText: user.phone ? this.maskPhone(user.phone) : '已绑定微信'
     });
     this.loadStats();
   },

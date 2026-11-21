@@ -1,7 +1,6 @@
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
 const PHONE_KEY = 'loginPhone';
-const EMAIL_KEY = 'loginEmail';
 
 function getToken() {
   return wx.getStorageSync(TOKEN_KEY) || '';
@@ -19,18 +18,15 @@ function getUser() {
  * 登录成功后统一保存令牌与用户信息。
  * 后端用户端令牌请求头为 authentication，由 request.js 自动携带。
  */
-function saveLogin(loginVO, account) {
+function saveLogin(loginVO) {
   wx.setStorageSync(TOKEN_KEY, loginVO.token);
   const user = {
     id: loginVO.id,
     openid: loginVO.openid || '',
     phone: loginVO.phone || wx.getStorageSync(PHONE_KEY) || '',
-    email: loginVO.email || account || ''
+    email: loginVO.email || ''
   };
   wx.setStorageSync(USER_KEY, user);
-  if (account && account.indexOf('@') > 0) {
-    wx.setStorageSync(EMAIL_KEY, account);
-  }
   const app = getApp();
   if (app) {
     app.globalData.user = user;
